@@ -15,14 +15,7 @@ x64/
 x86/
 build/
 bld/
-# Ignore bin directory
 [Bb]in/
-# But don't ignore this specific path
-!bin/
-!bin/Release/
-!bin/Release/net8.0-windows/
-!bin/Release/net8.0-windows/publish/
-!bin/Release/net8.0-windows/publish/win-x86/
 [Oo]bj/
 [Oo]ut/
 msbuild.log
