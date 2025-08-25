@@ -1,0 +1,59 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers on version tags like v1.0.0, v1.1.0, etc.
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore "AI Knowledge Generator.sln"
+      
+    - name: Build Release
+      run: dotnet build "AI Knowledge Generator.sln" --configuration Release --no-restore
+      
+    - name: Publish Windows x64
+      run: dotnet publish "AI Knowledge Generator.csproj" --configuration Release --runtime win-x64 --self-contained true --output ./publish/win-x64
+      
+    - name: Publish Windows x86
+      run: dotnet publish "AI Knowledge Generator.csproj" --configuration Release --runtime win-x86 --self-contained true --output ./publish/win-x86
+      
+    - name: Create Release Archives
+      run: |
+        Compress-Archive -Path "./publish/win-x64/*" -DestinationPath "./AI-Knowledge-Generator-win-x64.zip"
+        Compress-Archive -Path "./publish/win-x86/*" -DestinationPath "./AI-Knowledge-Generator-win-x86.zip"
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./AI-Knowledge-Generator-win-x64.zip
+          ./AI-Knowledge-Generator-win-x86.zip
+        body: |
+          ## Changes in this Release
+          - Add your release notes here
+          
+          ## Download
+          - **Windows 64-bit**: AI-Knowledge-Generator-win-x64.zip
+          - **Windows 32-bit**: AI-Knowledge-Generator-win-x86.zip
+          
+          ## Installation
+          1. Download the appropriate zip file for your system
+          2. Extract the zip file
+          3. Run `AI Knowledge Generator.exe`
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
